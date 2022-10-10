@@ -1,0 +1,32 @@
+# Unique name for this workflow
+name: Pull request deploy to master branch.
+
+on:
+    push:
+        branches:
+            - develop
+              
+jobs:
+  build:
+    if: github.event.pull_request.merged == 'true'
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+
+        - name: Install Salesforce CLI
+          run: |
+              wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+              mkdir sfdx-cli
+              tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+              ./sfdx-cli/install
+            
+       - name: 'Populate auth file with SFDX_URL secret'
+      shell: bash
+      run: 'echo ${{ secrets.SFDX_URL}} > SFDX_QA'
+      
+    - name: 'Authenticate to Production Org'
+      run: sfdx auth:sfdxurl:store -f SFDX_QA -s -a production
+      
+    - name: 'Run deploy'
+      run: sfdx force:source:deploy -x manifest/package.xml --testlevel RunLocalTests --json

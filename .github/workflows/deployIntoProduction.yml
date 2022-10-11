@@ -4,18 +4,17 @@ name: Pull request deploy to master branch.
 on:
     push:
         branches:
-            - develop
+            - main
               
 jobs:
   build:
-    if: github.event.pull_request.merged == 'true'
     runs-on: ubuntu-latest
     steps:
         - name: Checkout
           uses: actions/checkout@v3
 
         - name: Install Salesforce CLI
-          run: |
+        - run: |
               wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
               mkdir sfdx-cli
               tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
